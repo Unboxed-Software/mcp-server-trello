@@ -112,6 +112,20 @@ export class TrelloClient {
   }
 
   /**
+   * Get the API key for pagination helper
+   */
+  getApiKey(): string {
+    return this.config.apiKey;
+  }
+
+  /**
+   * Get the token for pagination helper
+   */
+  getToken(): string {
+    return this.config.token;
+  }
+
+  /**
    * Set the active board
    */
   async setActiveBoard(boardId: string): Promise<TrelloBoard> {
@@ -403,19 +417,22 @@ export class TrelloClient {
     }
 
     // Get all cards from the board with checklists
-    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(`/boards/${effectiveBoardId}/cards`, {
-      params: {
-        checklists: 'all',
-      },
-    });
+    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(
+      `/boards/${effectiveBoardId}/cards`,
+      {
+        params: {
+          checklists: 'all',
+        },
+      }
+    );
 
     const allCheckItems: CheckListItem[] = [];
-    
+
     for (const card of cards.data) {
       if (card.checklists) {
         for (const checklist of card.checklists) {
           if (checklist.name.toLowerCase() === name.toLowerCase()) {
-            const convertedItems = checklist.checkItems.map(item => 
+            const convertedItems = checklist.checkItems.map(item =>
               this.convertToCheckListItem(item, checklist.id)
             );
             allCheckItems.push(...convertedItems);
@@ -427,18 +444,25 @@ export class TrelloClient {
     return allCheckItems;
   }
 
-  async addChecklistItem(text: string, checkListName: string, boardId?: string): Promise<CheckListItem> {
+  async addChecklistItem(
+    text: string,
+    checkListName: string,
+    boardId?: string
+  ): Promise<CheckListItem> {
     const effectiveBoardId = boardId || this.activeConfig.boardId;
     if (!effectiveBoardId) {
       throw new McpError(ErrorCode.InvalidParams, 'No board ID provided and no active board set');
     }
 
     // Find the checklist by name
-    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(`/boards/${effectiveBoardId}/cards`, {
-      params: {
-        checklists: 'all',
-      },
-    });
+    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(
+      `/boards/${effectiveBoardId}/cards`,
+      {
+        params: {
+          checklists: 'all',
+        },
+      }
+    );
 
     let targetChecklist: TrelloChecklist | null = null;
 
@@ -469,22 +493,28 @@ export class TrelloClient {
     return this.convertToCheckListItem(response.data, targetChecklist.id);
   }
 
-  async findChecklistItemsByDescription(description: string, boardId?: string): Promise<CheckListItem[]> {
+  async findChecklistItemsByDescription(
+    description: string,
+    boardId?: string
+  ): Promise<CheckListItem[]> {
     const effectiveBoardId = boardId || this.activeConfig.boardId;
     if (!effectiveBoardId) {
       throw new McpError(ErrorCode.InvalidParams, 'No board ID provided and no active board set');
     }
 
     // Get all cards from the board with checklists
-    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(`/boards/${effectiveBoardId}/cards`, {
-      params: {
-        checklists: 'all',
-      },
-    });
+    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(
+      `/boards/${effectiveBoardId}/cards`,
+      {
+        params: {
+          checklists: 'all',
+        },
+      }
+    );
 
     const matchingItems: CheckListItem[] = [];
     const searchTerm = description.toLowerCase();
-    
+
     for (const card of cards.data) {
       if (card.checklists) {
         for (const checklist of card.checklists) {
@@ -511,11 +541,14 @@ export class TrelloClient {
     }
 
     // Get all cards from the board with checklists
-    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(`/boards/${effectiveBoardId}/cards`, {
-      params: {
-        checklists: 'all',
-      },
-    });
+    const cards = await this.axiosInstance.get<EnhancedTrelloCard[]>(
+      `/boards/${effectiveBoardId}/cards`,
+      {
+        params: {
+          checklists: 'all',
+        },
+      }
+    );
 
     for (const card of cards.data) {
       if (card.checklists) {
@@ -694,7 +727,10 @@ export class TrelloClient {
   }
 
   // Helper methods to convert between Trello types and MCP types
-  private convertToCheckListItem(trelloItem: TrelloCheckItem, parentCheckListId: string): CheckListItem {
+  private convertToCheckListItem(
+    trelloItem: TrelloCheckItem,
+    parentCheckListId: string
+  ): CheckListItem {
     return {
       id: trelloItem.id,
       text: trelloItem.name,
@@ -704,14 +740,18 @@ export class TrelloClient {
   }
 
   private convertToCheckList(trelloChecklist: TrelloChecklist): CheckList {
-    const completedItems = trelloChecklist.checkItems.filter(item => item.state === 'complete').length;
+    const completedItems = trelloChecklist.checkItems.filter(
+      item => item.state === 'complete'
+    ).length;
     const totalItems = trelloChecklist.checkItems.length;
     const percentComplete = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
     return {
       id: trelloChecklist.id,
       name: trelloChecklist.name,
-      items: trelloChecklist.checkItems.map(item => this.convertToCheckListItem(item, trelloChecklist.id)),
+      items: trelloChecklist.checkItems.map(item =>
+        this.convertToCheckListItem(item, trelloChecklist.id)
+      ),
       percentComplete,
     };
   }
