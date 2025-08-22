@@ -78,34 +78,88 @@ export class PaginationHelper {
 
   /**
    * Fetches a single page with pagination info
+   * Note: Since Trello doesn't support true cursor pagination for cards in lists,
+   * we fetch all cards and implement client-side pagination
    */
-  async fetchPage<T extends { id: string }>(
+  async fetchPage<T extends { id: string; pos?: number }>(
     endpoint: string,
     options: PaginationOptions = {}
   ): Promise<PaginatedResponse<T>> {
     const limit = options.limit || 100;
 
-    const params = new URLSearchParams({
-      key: this.client.getApiKey(),
-      token: this.client.getToken(),
-      limit: limit.toString(),
-      ...(options.before && { before: options.before }),
-      ...(options.since && { since: options.since }),
-      ...(options.fields && { fields: options.fields.join(',') }),
-    });
+    // For lists/cards endpoint, Trello doesn't support before/since parameters
+    // So we need to fetch all and do client-side pagination
+    const isListCardsEndpoint = endpoint.includes('/lists/') && endpoint.includes('/cards');
+    
+    if (isListCardsEndpoint && options.before) {
+      // Fetch all cards for client-side pagination
+      const params = new URLSearchParams({
+        key: this.client.getApiKey(),
+        token: this.client.getToken(),
+        ...(options.fields && { fields: options.fields.join(',') }),
+      });
 
-    const response = await fetch(`${endpoint}?${params}`);
+      const response = await fetch(`${endpoint}?${params}`);
 
-    if (!response.ok) {
-      throw new Error(`Trello API error: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Trello API error: ${response.status} ${response.statusText}`);
+      }
+
+      const allItems: T[] = await response.json();
+      
+      // Sort by position to ensure consistent ordering
+      allItems.sort((a, b) => (a.pos || 0) - (b.pos || 0));
+      
+      // Find the index of the cursor card
+      const cursorIndex = allItems.findIndex(item => item.id === options.before);
+      
+      if (cursorIndex === -1 || cursorIndex + 1 >= allItems.length) {
+        // Cursor not found or at the end
+        return {
+          items: [],
+          hasMore: false,
+          nextCursor: undefined,
+        };
+      }
+      
+      // Get items after the cursor
+      const startIndex = cursorIndex + 1;
+      const items = allItems.slice(startIndex, startIndex + limit);
+      
+      return {
+        items,
+        hasMore: startIndex + limit < allItems.length,
+        nextCursor: items.length === limit ? items[items.length - 1].id : undefined,
+      };
+    } else {
+      // Standard fetch for first page or non-list endpoints
+      const params = new URLSearchParams({
+        key: this.client.getApiKey(),
+        token: this.client.getToken(),
+        ...(options.fields && { fields: options.fields.join(',') }),
+      });
+
+      const response = await fetch(`${endpoint}?${params}`);
+
+      if (!response.ok) {
+        throw new Error(`Trello API error: ${response.status} ${response.statusText}`);
+      }
+
+      const allItems: T[] = await response.json();
+      
+      // Sort by position if available
+      if (allItems.length > 0 && 'pos' in allItems[0]) {
+        allItems.sort((a, b) => (a.pos || 0) - (b.pos || 0));
+      }
+      
+      // Return first page
+      const items = allItems.slice(0, limit);
+
+      return {
+        items,
+        hasMore: items.length < allItems.length,
+        nextCursor: items.length === limit && items.length < allItems.length ? items[items.length - 1].id : undefined,
+      };
     }
-
-    const items: T[] = await response.json();
-
-    return {
-      items,
-      hasMore: items.length === limit,
-      nextCursor: items.length === limit ? items[items.length - 1].id : undefined,
-    };
   }
 }

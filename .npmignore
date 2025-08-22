@@ -1,0 +1,44 @@
+# Source files (TypeScript)
+src/
+*.ts
+!*.d.ts
+
+# Development files
+scripts/
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# Configuration files
+.env*
+.git*
+.eslintrc*
+.prettierrc*
+tsconfig.json
+babel.config.js
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+__tests__/
+*.test.*
+*.spec.*
+
+# Build artifacts
+*.log
+node_modules/
+.npm/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Example and template files
+example.env
+*.template

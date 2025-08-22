@@ -5,6 +5,9 @@
  * Usage: node scripts/test-pagination.js <list-id>
  */
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { TrelloClient } from '../build/trello-client.js';
 import { getListStats } from '../build/tools/get-list-stats.js';
 import { getCardIdsByList } from '../build/tools/get-card-ids-by-list.js';

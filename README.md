@@ -1,10 +1,19 @@
-# MCP Server Trello
+# MCP Server Trello - Enhanced Edition
 
-[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/27359682-7632-4ba7-981d-7dfecadf1c4b)
+[![npm version](https://img.shields.io/npm/v/@unboxed-software/mcp-server-trello.svg)](https://www.npmjs.com/package/@unboxed-software/mcp-server-trello)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<a href="https://glama.ai/mcp/servers/klqkamy7wt"><img width="380" height="200" src="https://glama.ai/mcp/servers/klqkamy7wt/badge" alt="Server Trello MCP server" /></a>
+> **Enhanced fork** of [@delorenj/mcp-server-trello](https://github.com/delorenj/mcp-server-trello) with advanced pagination support for large Trello boards.
 
-A Model Context Protocol (MCP) server that provides tools for interacting with Trello boards. This server enables seamless integration with Trello's API while handling rate limiting, type safety, and error handling automatically.
+A Model Context Protocol (MCP) server that provides tools for interacting with Trello boards. This enhanced version includes comprehensive pagination support, making it possible to work with boards containing thousands of cards without hitting token limits.
+
+## 🚀 Key Features
+
+- **Advanced Pagination** - Handle boards with 1000+ cards efficiently
+- **Token Optimization** - Lightweight mode reduces token usage by 70-80%
+- **Complete Checklist Management** - Full suite of checklist tools
+- **Cursor-Based Navigation** - Reliable pagination through large lists
+- **Batch Operations** - Efficient multi-card fetching
 
 ## 🎉 New in v1.2.0: Complete Checklist Management Suite!
 
@@ -85,7 +94,7 @@ A Model Context Protocol (MCP) server that provides tools for interacting with T
 ### 1.0.0
 
 - Fixed MCP protocol compatibility by removing all console output that interfered with JSON-RPC communication
-- Improved pnpx support - now works seamlessly with `pnpx @delorenj/mcp-server-trello`
+- Improved npx support - now works seamlessly with `npx @unboxed-software/mcp-server-trello`
 - Updated installation docs to feature pnpx as the primary installation method
 - Added mise installation instructions for convenient tool management
 - Production-ready release with stable API
@@ -141,9 +150,15 @@ A Model Context Protocol (MCP) server that provides tools for interacting with T
 
 ## Installation
 
-### Quick Start with pnpx (Recommended)
+### NPM Installation
 
-The easiest way to use the Trello MCP server is with `pnpx`, which doesn't require a global install:
+```bash
+npm install -g @unboxed-software/mcp-server-trello
+```
+
+### Quick Start with npx (Recommended)
+
+The easiest way to use the Trello MCP server is with `npx`, which doesn't require a global install:
 
 ```json
 {
@@ -211,7 +226,7 @@ mise install pnpm
 If you prefer using npm directly:
 
 ```bash
-npm install -g @delorenj/mcp-server-trello
+npm install -g @unboxed-software/mcp-server-trello
 ```
 
 Then use `mcp-server-trello` as the command in your MCP configuration.
